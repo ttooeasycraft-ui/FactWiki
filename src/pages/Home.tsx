@@ -33,7 +33,7 @@ const featuredCards = [
   {
     path: "/xp-mineracao",
     icon: Zap,
-    title: "XP e Mineração",
+    title: "Mineração",
     desc: "Tabela de XP por minério e dicas para farmar eficientemente.",
   },
   {
