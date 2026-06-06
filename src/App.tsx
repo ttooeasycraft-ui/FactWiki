@@ -6,7 +6,6 @@ import Spawners from "@/pages/Spawners";
 import Factions from "@/pages/Factions";
 import Rules from "@/pages/Rules";
 import Shop from "@/pages/Shop";
-import Events from "@/pages/Events";
 import HowToJoin from "@/pages/HowToJoin";
 import {
   Home as HomeIcon,
@@ -16,7 +15,6 @@ import {
   Zap,
   Box,
   Swords,
-  Radio,
   Settings,
   Menu,
   X,
@@ -36,15 +34,9 @@ const navItems = [
   {
     section: "SISTEMAS",
     items: [
-      { label: "XP e Mineração", path: "/xp-mineracao", icon: Zap },
+      { label: "Mineração", path: "/xp-mineracao", icon: Zap },
       { label: "Spawners", path: "/spawners", icon: Box },
       { label: "Facções", path: "/faccoes", icon: Swords },
-    ],
-  },
-  {
-    section: "AO VIVO",
-    items: [
-      { label: "Eventos e Notícias", path: "/eventos", icon: Radio },
     ],
   },
 ];
@@ -419,7 +411,6 @@ function App() {
           <Route path="/xp-mineracao" component={XPMining} />
           <Route path="/spawners" component={Spawners} />
           <Route path="/faccoes" component={Factions} />
-          <Route path="/eventos" component={Events} />
         </Switch>
       </Layout>
     </WouterRouter>
