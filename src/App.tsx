@@ -49,8 +49,124 @@ const navItems = [
   },
 ];
 
+function SupportPopup({ onClose }: { onClose: () => void }) {
+  return (
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 100,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "1rem",
+      }}
+      onClick={onClose}
+    >
+      <div
+        style={{
+          background: "#161616",
+          border: "1px solid rgba(34,197,94,0.25)",
+          borderRadius: "0.75rem",
+          padding: "1.5rem",
+          width: "100%",
+          maxWidth: 320,
+          position: "relative",
+          boxShadow: "0 8px 40px rgba(0,0,0,0.7)",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          onClick={onClose}
+          style={{
+            position: "absolute",
+            top: "0.75rem",
+            right: "0.75rem",
+            background: "none",
+            border: "none",
+            color: "#555",
+            cursor: "pointer",
+            fontSize: "1rem",
+            lineHeight: 1,
+          }}
+        >
+          ✕
+        </button>
+
+        <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "0.875rem" }}>
+          <div
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: "50%",
+              background: "rgba(232,67,147,0.12)",
+              border: "1px solid rgba(232,67,147,0.3)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
+          >
+            <Heart size={15} style={{ color: "#e84393" }} />
+          </div>
+          <div>
+            <div style={{ fontWeight: 700, fontSize: "0.9rem", color: "#fff" }}>
+              Gostou do FactWiki?
+            </div>
+            <div style={{ fontSize: "0.72rem", color: "#666" }}>
+              Obrigado por usar nosso guia!
+            </div>
+          </div>
+        </div>
+
+        <p style={{ fontSize: "0.8rem", color: "#aaa", lineHeight: 1.65, margin: "0 0 1rem" }}>
+          O FactWiki é feito pela comunidade, com carinho, para ajudar todo mundo
+          a dominar o Factions Matrix. Se este guia te ajudou, compartilha com
+          seus aliados no servidor! 🏰
+        </p>
+
+        <div
+          style={{
+            borderTop: "1px solid rgba(255,255,255,0.06)",
+            paddingTop: "0.875rem",
+            fontSize: "0.78rem",
+            color: "#888",
+          }}
+        >
+          Sugestões? Fale com a gente no Discord:
+          <a
+            href="https://discord.gg/factions"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.4rem",
+              marginTop: "0.5rem",
+              padding: "0.5rem 0.75rem",
+              borderRadius: "0.4rem",
+              background: "rgba(34,197,94,0.07)",
+              border: "1px solid rgba(34,197,94,0.2)",
+              color: "#22C55E",
+              textDecoration: "none",
+              fontWeight: 600,
+              fontSize: "0.8rem",
+              transition: "background 0.15s",
+            }}
+            onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = "rgba(34,197,94,0.14)")}
+            onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = "rgba(34,197,94,0.07)")}
+          >
+            💬 discord.gg/factions
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function Sidebar({ onClose }: { onClose?: () => void }) {
   const [location] = useLocation();
+  const [showSupport, setShowSupport] = useState(false);
 
   return (
     <aside
@@ -167,6 +283,7 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
         </span>
         <button
           title="Apoiar o projeto"
+          onClick={() => setShowSupport(true)}
           style={{
             background: "none",
             border: "none",
@@ -184,6 +301,8 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
           <Heart size={13} />
         </button>
       </div>
+
+      {showSupport && <SupportPopup onClose={() => setShowSupport(false)} />}
     </aside>
   );
 }
