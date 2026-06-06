@@ -1,11 +1,11 @@
 import { Zap, AlertTriangle } from "lucide-react";
 
 const ores = [
-  { name: "Carvão", img: "/ore-coal.png", xp: "4.6 XP", bar: 0.575 },
-  { name: "Redstone", img: "/ore-redstone.png", xp: "5.7 XP", bar: 0.7125 },
-  { name: "Lápis-Lazúli", img: "/ore-lapis.png", xp: "5.7 XP", bar: 0.7125 },
-  { name: "Ferro", img: "/ore-iron.png", xp: "6.9 XP", bar: 0.8625 },
-  { name: "Ouro", img: "/ore-gold.png", xp: "8.0 XP", bar: 1 },
+  { name: "Carvão", emoji: "🪨", xp: "4.6 XP", bar: 0.575 },
+  { name: "Redstone", emoji: "🔴", xp: "5.7 XP", bar: 0.7125 },
+  { name: "Lápis-Lazúli", emoji: "🔵", xp: "5.7 XP", bar: 0.7125 },
+  { name: "Ferro", emoji: "⚙️", xp: "6.9 XP", bar: 0.8625 },
+  { name: "Ouro", emoji: "🟡", xp: "8.0 XP", bar: 1 },
 ];
 
 export default function XPMining() {
@@ -28,7 +28,7 @@ export default function XPMining() {
         </div>
         <div>
           <h1 style={{ fontSize: "1.5rem", fontWeight: 800, color: "#fff", margin: 0 }}>
-            XP e Mineração
+            Mineração
           </h1>
           <p style={{ color: "#666", fontSize: "0.8rem", margin: 0 }}>
             Tabela de XP confirmados pelo servidor
@@ -87,11 +87,7 @@ export default function XPMining() {
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
-              <img
-                src={ore.img}
-                alt={ore.name}
-                style={{ width: 28, height: 28, imageRendering: "pixelated", flexShrink: 0 }}
-              />
+              <span style={{ fontSize: "1.4rem", lineHeight: 1, flexShrink: 0 }}>{ore.emoji}</span>
               <span style={{ color: "#e5e5e5", fontSize: "0.875rem", fontWeight: 500 }}>
                 {ore.name}
               </span>

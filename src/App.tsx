@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter";
+import { SettingsProvider, useSettings } from "@/context/SettingsContext";
 import Home from "@/pages/Home";
 import XPMining from "@/pages/XPMining";
 import Spawners from "@/pages/Spawners";
@@ -19,6 +20,11 @@ import {
   Menu,
   X,
   Heart,
+  Palette,
+  Type,
+  Cpu,
+  Sliders,
+  User,
 } from "lucide-react";
 
 const navItems = [
@@ -41,17 +47,20 @@ const navItems = [
   },
 ];
 
+// ─── Support Popup ──────────────────────────────────────────────────────────
+
 function SupportPopup({ onClose }: { onClose: () => void }) {
   return (
     <div
       style={{
         position: "fixed",
         inset: 0,
-        zIndex: 100,
+        zIndex: 200,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         padding: "1rem",
+        background: "rgba(0,0,0,0.5)",
       }}
       onClick={onClose}
     >
@@ -117,14 +126,7 @@ function SupportPopup({ onClose }: { onClose: () => void }) {
           seus aliados no servidor! 🏰
         </p>
 
-        <div
-          style={{
-            borderTop: "1px solid rgba(255,255,255,0.06)",
-            paddingTop: "0.875rem",
-            fontSize: "0.78rem",
-            color: "#888",
-          }}
-        >
+        <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "0.875rem", fontSize: "0.78rem", color: "#888" }}>
           Sugestões? Fale com a gente no Discord:
           <a
             href="https://discord.gg/factions"
@@ -139,14 +141,11 @@ function SupportPopup({ onClose }: { onClose: () => void }) {
               borderRadius: "0.4rem",
               background: "rgba(34,197,94,0.07)",
               border: "1px solid rgba(34,197,94,0.2)",
-              color: "#22C55E",
+              color: "var(--accent-color, #22C55E)",
               textDecoration: "none",
               fontWeight: 600,
               fontSize: "0.8rem",
-              transition: "background 0.15s",
             }}
-            onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = "rgba(34,197,94,0.14)")}
-            onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = "rgba(34,197,94,0.07)")}
           >
             💬 discord.gg/factions
           </a>
@@ -156,14 +155,313 @@ function SupportPopup({ onClose }: { onClose: () => void }) {
   );
 }
 
+// ─── Settings Panel ──────────────────────────────────────────────────────────
+
+type SettingsTab = "aparencia" | "performance" | "personalizar";
+
+const TABS: { id: SettingsTab; label: string; icon: React.ComponentType<{ size?: number }> }[] = [
+  { id: "aparencia", label: "Aparência", icon: Palette },
+  { id: "performance", label: "Performance", icon: Cpu },
+  { id: "personalizar", label: "Personalizar", icon: Sliders },
+];
+
+function Toggle({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <div
+      onClick={() => onChange(!value)}
+      style={{
+        width: 40,
+        height: 22,
+        borderRadius: 99,
+        background: value ? "var(--accent-color, #22C55E)" : "#333",
+        position: "relative",
+        cursor: "pointer",
+        transition: "background 0.2s",
+        flexShrink: 0,
+      }}
+    >
+      <div
+        style={{
+          position: "absolute",
+          top: 3,
+          left: value ? 21 : 3,
+          width: 16,
+          height: 16,
+          borderRadius: "50%",
+          background: "#fff",
+          transition: "left 0.2s",
+          boxShadow: "0 1px 3px rgba(0,0,0,0.3)",
+        }}
+      />
+    </div>
+  );
+}
+
+function SectionLabel({ icon: Icon, label }: { icon: React.ComponentType<{ size?: number; style?: React.CSSProperties }>; label: string }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", padding: "0.5rem 0 0.25rem", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#555" }}>
+      <Icon size={11} style={{ color: "var(--accent-color, #22C55E)" }} />
+      {label}
+    </div>
+  );
+}
+
+function SettingRow({ label, desc, children }: { label: string; desc?: string; children: React.ReactNode }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.75rem", padding: "0.5rem 0", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+      <div>
+        <div style={{ fontSize: "0.8rem", color: "#ddd", fontWeight: 500 }}>{label}</div>
+        {desc && <div style={{ fontSize: "0.7rem", color: "#555", lineHeight: 1.4, marginTop: "0.1rem" }}>{desc}</div>}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function SettingsPanel({ onClose }: { onClose: () => void }) {
+  const { settings, update, themes, fontSizeOptions, isValidHex } = useSettings();
+  const [tab, setTab] = useState<SettingsTab>("aparencia");
+  const [customHexInput, setCustomHexInput] = useState(settings.customThemeHex ?? "");
+
+  return (
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 150,
+        display: "flex",
+        background: "rgba(0,0,0,0.6)",
+      }}
+      onClick={onClose}
+    >
+      <div
+        style={{
+          width: 300,
+          height: "100%",
+          background: "#111",
+          borderRight: "1px solid rgba(255,255,255,0.07)",
+          display: "flex",
+          flexDirection: "column",
+          overflowY: "auto",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "1rem 1rem 0.75rem", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            <Settings size={16} style={{ color: "var(--accent-color, #22C55E)" }} />
+            <span style={{ fontWeight: 700, fontSize: "0.95rem", color: "#fff" }}>Configurações</span>
+          </div>
+          <button onClick={onClose} style={{ background: "none", border: "none", color: "#555", cursor: "pointer", padding: "0.25rem" }}>
+            <X size={16} />
+          </button>
+        </div>
+
+        {/* Tabs */}
+        <div style={{ display: "flex", gap: "0.25rem", padding: "0.75rem 0.75rem 0", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+          {TABS.map((t) => {
+            const Icon = t.icon;
+            return (
+              <button
+                key={t.id}
+                onClick={() => setTab(t.id)}
+                style={{
+                  flex: 1,
+                  padding: "0.35rem 0.25rem",
+                  borderRadius: "0.375rem",
+                  border: "none",
+                  background: tab === t.id ? "rgba(34,197,94,0.12)" : "transparent",
+                  color: tab === t.id ? "var(--accent-color, #22C55E)" : "#555",
+                  fontSize: "0.65rem",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: "0.2rem",
+                  transition: "all 0.15s",
+                  marginBottom: "0.5rem",
+                }}
+              >
+                <Icon size={14} />
+                {t.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Tab Content */}
+        <div style={{ flex: 1, padding: "0 1rem 1rem" }}>
+
+          {/* ── APARÊNCIA ── */}
+          {tab === "aparencia" && (
+            <div>
+              <SectionLabel icon={Palette} label="Cor do Tema" />
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "0.4rem", paddingBottom: "0.75rem" }}>
+                {themes.map((theme) => (
+                  <button
+                    key={theme.id}
+                    onClick={() => update({ themeId: theme.id, customThemeHex: null })}
+                    style={{
+                      padding: "0.5rem",
+                      borderRadius: "0.375rem",
+                      border: `1px solid ${settings.themeId === theme.id && !settings.customThemeHex ? theme.hex : "rgba(255,255,255,0.08)"}`,
+                      background: settings.themeId === theme.id && !settings.customThemeHex ? `${theme.hex}18` : "rgba(255,255,255,0.02)",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.5rem",
+                      transition: "all 0.15s",
+                    }}
+                  >
+                    <div style={{ width: 14, height: 14, borderRadius: "50%", background: theme.hex, flexShrink: 0 }} />
+                    <span style={{ fontSize: "0.75rem", color: "#ccc", fontWeight: 500 }}>{theme.label}</span>
+                  </button>
+                ))}
+              </div>
+
+              <SectionLabel icon={Palette} label="Cor Personalizada (HEX)" />
+              <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", paddingBottom: "0.75rem" }}>
+                <input
+                  type="text"
+                  value={customHexInput}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setCustomHexInput(val);
+                    if (isValidHex(val)) update({ customThemeHex: val });
+                  }}
+                  placeholder="#22C55E"
+                  maxLength={7}
+                  style={{
+                    flex: 1,
+                    background: "#1a1a1a",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    borderRadius: "0.375rem",
+                    padding: "0.4rem 0.6rem",
+                    color: "#fff",
+                    fontSize: "0.8rem",
+                    fontFamily: "monospace",
+                    textTransform: "uppercase",
+                    outline: "none",
+                  }}
+                />
+                {isValidHex(customHexInput) && (
+                  <div style={{ width: 32, height: 32, borderRadius: "0.375rem", background: customHexInput, border: "1px solid rgba(255,255,255,0.1)", flexShrink: 0 }} />
+                )}
+              </div>
+              {settings.customThemeHex && (
+                <button
+                  onClick={() => { update({ customThemeHex: null, themeId: "verde" }); setCustomHexInput(""); }}
+                  style={{ fontSize: "0.7rem", color: "#666", background: "none", border: "none", cursor: "pointer", padding: 0, marginBottom: "0.5rem" }}
+                >
+                  Remover cor personalizada
+                </button>
+              )}
+
+              <SectionLabel icon={Type} label="Tamanho do Texto" />
+              <div style={{ display: "flex", gap: "0.4rem", paddingBottom: "0.75rem" }}>
+                {fontSizeOptions.map((opt) => (
+                  <button
+                    key={opt.id}
+                    onClick={() => update({ fontSize: opt.id })}
+                    style={{
+                      flex: 1,
+                      padding: "0.4rem",
+                      borderRadius: "0.375rem",
+                      border: `1px solid ${settings.fontSize === opt.id ? "var(--accent-color, #22C55E)" : "rgba(255,255,255,0.08)"}`,
+                      background: settings.fontSize === opt.id ? "rgba(34,197,94,0.1)" : "transparent",
+                      color: settings.fontSize === opt.id ? "var(--accent-color, #22C55E)" : "#666",
+                      fontSize: "0.7rem",
+                      fontWeight: 600,
+                      cursor: "pointer",
+                      fontFamily: "monospace",
+                      transition: "all 0.15s",
+                    }}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ── PERFORMANCE ── */}
+          {tab === "performance" && (
+            <div>
+              <SectionLabel icon={Cpu} label="Otimização" />
+              <SettingRow label="Modo Leve" desc="Desativa animações e transições. Recomendado para celulares fracos.">
+                <Toggle value={settings.liteMode} onChange={(v) => update({ liteMode: v })} />
+              </SettingRow>
+              <SettingRow label="Sidebar Compacta" desc="Esconde os textos do menu lateral para ganhar espaço.">
+                <Toggle value={settings.sidebarCompact} onChange={(v) => update({ sidebarCompact: v })} />
+              </SettingRow>
+            </div>
+          )}
+
+          {/* ── PERSONALIZAR ── */}
+          {tab === "personalizar" && (
+            <div>
+              <SectionLabel icon={User} label="Seu Nome" />
+              <div style={{ paddingBottom: "0.75rem" }}>
+                <input
+                  type="text"
+                  value={settings.playerName}
+                  onChange={(e) => update({ playerName: e.target.value })}
+                  placeholder="Seu nick no servidor..."
+                  maxLength={24}
+                  style={{
+                    width: "100%",
+                    background: "#1a1a1a",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    borderRadius: "0.375rem",
+                    padding: "0.5rem 0.75rem",
+                    color: "#fff",
+                    fontSize: "0.8rem",
+                    outline: "none",
+                    boxSizing: "border-box",
+                  }}
+                />
+              </div>
+
+              <SectionLabel icon={Sliders} label="Conteúdo" />
+              <SettingRow label="Dica do Dia" desc="Exibe a dica do dia na página inicial.">
+                <Toggle value={settings.showTips} onChange={(v) => update({ showTips: v })} />
+              </SettingRow>
+            </div>
+          )}
+        </div>
+
+        {/* Footer reset */}
+        <div style={{ padding: "0.75rem 1rem", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+          <button
+            onClick={() => {
+              update({ themeId: "verde", customThemeHex: null, liteMode: false, fontSize: "normal", sidebarCompact: false, showTips: true, playerName: "" });
+              setCustomHexInput("");
+            }}
+            style={{ width: "100%", padding: "0.5rem", borderRadius: "0.375rem", border: "1px solid rgba(255,255,255,0.08)", background: "transparent", color: "#555", fontSize: "0.75rem", cursor: "pointer", transition: "color 0.15s" }}
+            onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "#ccc")}
+            onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "#555")}
+          >
+            Restaurar padrões
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Sidebar ──────────────────────────────────────────────────────────────────
+
 function Sidebar({ onClose }: { onClose?: () => void }) {
   const [location] = useLocation();
   const [showSupport, setShowSupport] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const { settings } = useSettings();
 
   return (
     <aside
       style={{
-        width: 220,
+        width: settings.sidebarCompact ? 56 : 220,
         minHeight: "100vh",
         background: "#0f0f0f",
         borderRight: "1px solid rgba(255,255,255,0.06)",
@@ -174,8 +472,10 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
         top: 0,
         height: "100vh",
         overflowY: "auto",
+        transition: "width 0.2s ease",
       }}
     >
+      {/* Header */}
       <div
         style={{
           display: "flex",
@@ -185,12 +485,12 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
           borderBottom: "1px solid rgba(255,255,255,0.06)",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", overflow: "hidden" }}>
           <div
             style={{
               width: 32,
               height: 32,
-              background: "#22C55E",
+              background: "var(--accent-color, #22C55E)",
               borderRadius: "0.375rem",
               display: "flex",
               alignItems: "center",
@@ -204,26 +504,22 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
           >
             FM
           </div>
-          <div style={{ lineHeight: 1 }}>
-            <div style={{ fontSize: "0.6rem", color: "#555", fontWeight: 600, letterSpacing: "0.05em" }}>
-              FW
+          {!settings.sidebarCompact && (
+            <div style={{ lineHeight: 1, overflow: "hidden" }}>
+              <div style={{ fontSize: "0.6rem", color: "#555", fontWeight: 600, letterSpacing: "0.05em" }}>FW</div>
+              <div style={{ fontSize: "0.8rem", fontWeight: 700, color: "#fff", letterSpacing: "0.04em", whiteSpace: "nowrap" }}>
+                FACTWIKI
+              </div>
             </div>
-            <div
-              style={{
-                fontSize: "0.8rem",
-                fontWeight: 700,
-                color: "#fff",
-                letterSpacing: "0.04em",
-              }}
-            >
-              FACTWIKI
-            </div>
-          </div>
+          )}
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.25rem", flexShrink: 0 }}>
           <button
-            style={{ background: "none", border: "none", color: "#555", cursor: "pointer", padding: "0.25rem", borderRadius: "0.25rem" }}
+            onClick={() => setShowSettings(true)}
+            style={{ background: "none", border: "none", color: "#555", cursor: "pointer", padding: "0.25rem", borderRadius: "0.25rem", transition: "color 0.15s" }}
             title="Configurações"
+            onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--accent-color, #22C55E)")}
+            onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "#555")}
           >
             <Settings size={15} />
           </button>
@@ -238,10 +534,16 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
         </div>
       </div>
 
+      {/* Nav */}
       <nav style={{ flex: 1, padding: "0.5rem 0.5rem 1rem" }}>
+        {settings.playerName && !settings.sidebarCompact && (
+          <div style={{ padding: "0.4rem 0.75rem 0.2rem", fontSize: "0.7rem", color: "var(--accent-color, #22C55E)", fontWeight: 600 }}>
+            👋 {settings.playerName}
+          </div>
+        )}
         {navItems.map((group) => (
           <div key={group.section}>
-            <div className="section-label">{group.section}</div>
+            {!settings.sidebarCompact && <div className="section-label">{group.section}</div>}
             {group.items.map((item) => {
               const Icon = item.icon;
               const isActive = location === item.path;
@@ -251,9 +553,11 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
                   href={item.path}
                   className={`sidebar-link${isActive ? " active" : ""}`}
                   onClick={onClose}
+                  title={settings.sidebarCompact ? item.label : undefined}
+                  style={settings.sidebarCompact ? { justifyContent: "center", padding: "0.5rem" } : {}}
                 >
                   <Icon size={15} strokeWidth={1.8} />
-                  {item.label}
+                  {!settings.sidebarCompact && item.label}
                 </Link>
               );
             })}
@@ -261,18 +565,19 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
         ))}
       </nav>
 
+      {/* Footer */}
       <div
         style={{
           padding: "0.625rem 0.75rem",
           borderTop: "1px solid rgba(255,255,255,0.06)",
           display: "flex",
           alignItems: "center",
-          justifyContent: "space-between",
+          justifyContent: settings.sidebarCompact ? "center" : "space-between",
         }}
       >
-        <span style={{ fontSize: "0.62rem", color: "#444" }}>
-          FactWiki — factionsmatrix.com
-        </span>
+        {!settings.sidebarCompact && (
+          <span style={{ fontSize: "0.62rem", color: "#444" }}>FactWiki — factionsmatrix.com</span>
+        )}
         <button
           title="Apoiar o projeto"
           onClick={() => setShowSupport(true)}
@@ -295,12 +600,16 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
       </div>
 
       {showSupport && <SupportPopup onClose={() => setShowSupport(false)} />}
+      {showSettings && <SettingsPanel onClose={() => setShowSettings(false)} />}
     </aside>
   );
 }
 
+// ─── Layout ──────────────────────────────────────────────────────────────────
+
 function Layout({ children }: { children: React.ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { settings } = useSettings();
 
   return (
     <div style={{ display: "flex", minHeight: "100vh" }}>
@@ -309,14 +618,7 @@ function Layout({ children }: { children: React.ReactNode }) {
       </div>
 
       {menuOpen && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 50,
-            display: "flex",
-          }}
-        >
+        <div style={{ position: "fixed", inset: 0, zIndex: 50, display: "flex" }}>
           <div
             style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.7)" }}
             onClick={() => setMenuOpen(false)}
@@ -353,7 +655,7 @@ function Layout({ children }: { children: React.ReactNode }) {
               style={{
                 width: 26,
                 height: 26,
-                background: "#22C55E",
+                background: "var(--accent-color, #22C55E)",
                 borderRadius: "0.3rem",
                 display: "flex",
                 alignItems: "center",
@@ -394,12 +696,15 @@ function Layout({ children }: { children: React.ReactNode }) {
           .mobile-header { display: flex !important; }
           main { padding: 1.25rem !important; }
         }
+        .lite-mode * { transition: none !important; animation: none !important; }
       `}</style>
     </div>
   );
 }
 
-function App() {
+// ─── App ──────────────────────────────────────────────────────────────────────
+
+function AppInner() {
   return (
     <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
       <Layout>
@@ -417,4 +722,10 @@ function App() {
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <SettingsProvider>
+      <AppInner />
+    </SettingsProvider>
+  );
+}
