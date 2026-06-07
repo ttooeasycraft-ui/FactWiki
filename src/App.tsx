@@ -11,7 +11,6 @@ import HowToJoin from "@/pages/HowToJoin";
 import {
   Home as HomeIcon,
   BookOpen,
-  LogIn,
   ShoppingCart,
   Zap,
   Box,
@@ -34,7 +33,6 @@ const navItems = [
     items: [
       { label: "Início", path: "/", icon: HomeIcon },
       { label: "Regras", path: "/regras", icon: BookOpen },
-      { label: "Como Entrar", path: "/como-entrar", icon: LogIn },
       { label: "Loja", path: "/loja", icon: ShoppingCart },
     ],
   },
