@@ -25,6 +25,7 @@ import {
   Cpu,
   Sliders,
   User,
+  LifeBuoy,
 } from "lucide-react";
 
 const navItems = [
@@ -121,13 +122,13 @@ function SupportPopup({ onClose }: { onClose: () => void }) {
         </div>
 
         <p style={{ fontSize: "0.8rem", color: "#aaa", lineHeight: 1.65, margin: "0 0 1rem" }}>
-          O FactWiki é feito pela comunidade, com carinho, para ajudar todo mundo
-          a dominar o Factions Matrix. Se este guia te ajudou, compartilha com
-          seus aliados no servidor! 🏰
+          O FactWiki é feito com carinho pela comunidade para ajudar todo mundo
+          a dominar o Factions Matrix. Tem sugestões de conteúdo ou encontrou
+          algum erro? Fala diretamente com <strong style={{ color: "#fff" }}>@sabidoreact</strong> no Discord! 🏰
         </p>
 
         <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "0.875rem", fontSize: "0.78rem", color: "#888" }}>
-          Sugestões? Fale com a gente no Discord:
+          Manda suas ideias para:
           <a
             href="https://discord.gg/factions"
             target="_blank"
@@ -147,7 +148,7 @@ function SupportPopup({ onClose }: { onClose: () => void }) {
               fontSize: "0.8rem",
             }}
           >
-            💬 discord.gg/factions
+            💬 @sabidoreact — discord.gg/factions
           </a>
         </div>
       </div>
@@ -238,7 +239,7 @@ function SettingsPanel({ onClose }: { onClose: () => void }) {
         style={{
           width: 300,
           height: "100%",
-          background: "#111",
+          background: "#0a0a0a",
           borderRight: "1px solid rgba(255,255,255,0.07)",
           display: "flex",
           flexDirection: "column",
@@ -578,25 +579,49 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
         {!settings.sidebarCompact && (
           <span style={{ fontSize: "0.62rem", color: "#444" }}>FactWiki — factionsmatrix.com</span>
         )}
-        <button
-          title="Apoiar o projeto"
-          onClick={() => setShowSupport(true)}
-          style={{
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            padding: "0.2rem",
-            display: "flex",
-            alignItems: "center",
-            color: "#555",
-            transition: "color 0.15s",
-            borderRadius: "0.25rem",
-          }}
-          onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "#e84393")}
-          onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "#555")}
-        >
-          <Heart size={13} />
-        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}>
+          <a
+            href="https://discord.com/channels/1501549652892192898/1503472556772950159"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Suporte — Canal do Discord"
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              padding: "0.2rem",
+              display: "flex",
+              alignItems: "center",
+              color: "#555",
+              transition: "color 0.15s",
+              borderRadius: "0.25rem",
+              textDecoration: "none",
+            }}
+            onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--accent-color, #22C55E)")}
+            onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "#555")}
+          >
+            <LifeBuoy size={13} />
+          </a>
+          <button
+            title="Apoiar o projeto"
+            onClick={() => setShowSupport(true)}
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              padding: "0.2rem",
+              display: "flex",
+              alignItems: "center",
+              color: "#555",
+              transition: "color 0.15s",
+              borderRadius: "0.25rem",
+            }}
+            onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "#e84393")}
+            onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "#555")}
+          >
+            <Heart size={13} />
+          </button>
+        </div>
       </div>
 
       {showSupport && <SupportPopup onClose={() => setShowSupport(false)} />}
