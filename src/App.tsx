@@ -9,6 +9,7 @@ import Rules from "@/pages/Rules";
 import Shop from "@/pages/Shop";
 import HowToJoin from "@/pages/HowToJoin";
 import Radar from "@/pages/Radar";
+import Radar from "@/pages/Radar";
 import {
   Home as HomeIcon,
   BookOpen,
