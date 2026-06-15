@@ -8,6 +8,7 @@ import Factions from "@/pages/Factions";
 import Rules from "@/pages/Rules";
 import Shop from "@/pages/Shop";
 import HowToJoin from "@/pages/HowToJoin";
+import Radar from "@/pages/Radar";
 import {
   Home as HomeIcon,
   BookOpen,
@@ -42,6 +43,12 @@ const navItems = [
       { label: "Mineração", path: "/xp-mineracao", icon: Zap },
       { label: "Spawners", path: "/spawners", icon: Box },
       { label: "Facções", path: "/faccoes", icon: Swords },
+    ],
+  },
+  {
+    section: "BOT",
+    items: [
+      { label: "Radar do Bot", path: "/radar", icon: Cpu },
     ],
   },
 ];
@@ -739,6 +746,7 @@ function AppInner() {
           <Route path="/xp-mineracao" component={XPMining} />
           <Route path="/spawners" component={Spawners} />
           <Route path="/faccoes" component={Factions} />
+          <Route path="/radar" component={Radar} />
         </Switch>
       </Layout>
     </WouterRouter>
